@@ -2,59 +2,44 @@
 session_start();
 include("../config/db.php");
 
-if(!isset($_SESSION['donor_id'])) {
-    header("Location: ../auth/login.php");
-    exit();
+if(!isset($_SESSION['donor_id'])){
+header("Location: ../auth/index.php");
+exit();
 }
 
-$donor_id = $_SESSION['donor_id'];
+$donor_id=$_SESSION['donor_id'];
 ?>
 
-<link rel="stylesheet" href="../assets/css/style.css">
+<h2>Welcome <?php echo $donor_id;?></h2>
 
-<div class="header">
-    <h2>Life-Line Hub</h2>
-    <p>Welcome, <?php echo $donor_id; ?></p>
-</div>
+<a href="../logout.php">Logout</a>
 
-<div class="container">
-
-    <!-- 🔴 Emergency Section -->
-    <div class="emergency">
-    <h3>🚨 Emergency Requests</h3>
-
-    <?php
-    $emergency = $conn->query("SELECT * FROM emergency ORDER BY created_at DESC");
-
-    while($row = $emergency->fetch_assoc()) {
-        echo "<p><b>".$row['org_name']."</b> - ".$row['message']." (".$row['location'].")</p>";
-    }
-    ?>
-</div>
-    <!-- 🔍 Search -->
-    <form method="GET">
-        <input type="text" name="search" placeholder="Search organisation...">
-        <button type="submit">Search</button>
-    </form>
-
-    <h3>Available Organisations</h3>
+<h3>Organisations</h3>
 
 <?php
-$search = isset($_GET['search']) ? $_GET['search'] : "";
+<link rel="stylesheet" href="../assets/css/style.css">
+$res=$conn->query("SELECT * FROM organisation");
 
-$query = "SELECT * FROM organisation WHERE name LIKE '%$search%'";
-$result = $conn->query($query);
+while($row=$res->fetch_assoc()){
 
-while($row = $result->fetch_assoc()) {
-    echo "<div class='card'>
-            <h3>".$row['name']."</h3>
-            <p><b>Location:</b> ".$row['location']."</p>
-            <p><b>Needs:</b> ".$row['needs']."</p>
-            <a href='donate.php?org_id=".$row['org_id']."'>
-                <button>Donate</button>
-            </a>
-          </div>";
+$org_id=$row['org_id'];
+
+$check=$conn->query("SELECT * FROM donation 
+WHERE donor_id='$donor_id' AND org_id='$org_id'
+ORDER BY date DESC LIMIT 1");
+
+$status="No Donation";
+if($check->num_rows>0){
+$d=$check->fetch_assoc();
+$status=$d['status'];
+}
+
+echo "
+<div>
+<h3>{$row['name']}</h3>
+<p>Status: $status</p>
+<a href='donate.php?org_id=$org_id'>Donate</a>
+</div>
+";
 }
 ?>
-
-</div>

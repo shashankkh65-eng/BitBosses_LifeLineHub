@@ -2,63 +2,71 @@
 session_start();
 include("../config/db.php");
 
-if(!isset($_SESSION['donor_id'])) {
-    header("Location: ../auth/login.php");
-    exit();
+if(!isset($_SESSION['donor_id'])){
+header("Location: ../auth/index.php");
+exit();
 }
 
-$donor_id = $_SESSION['donor_id'];
-$org_id = $_GET['org_id'];
+$donor_id=$_SESSION['donor_id'];
+$org_id=$_GET['org_id'];
 
-// Fetch organisation
-$org = $conn->query("SELECT * FROM organisation WHERE org_id='$org_id'")->fetch_assoc();
+if(isset($_POST['donate'])){
+$cat=$_POST['category'];
+$qty=$_POST['qty'];
+$price=$_POST['price'];
 
-// Handle form submission
-if(isset($_POST['donate'])) {
+$total=$qty*$price;
 
-    $category = $_POST['category'];
-    $amount = $_POST['amount'];
+$conn->query("INSERT INTO donation 
+(donor_id,org_id,category,amount,status)
+VALUES('$donor_id','$org_id','$cat','$total','Pending')");
 
-    // File upload
-    $proof = $_FILES['proof']['name'];
-    $temp = $_FILES['proof']['tmp_name'];
-
-    move_uploaded_file($temp, "../uploads/".$proof);
-
-    $conn->query("INSERT INTO donation (donor_id, org_id, category, amount, proof_image)
-                  VALUES ('$donor_id','$org_id','$category','$amount','$proof')");
-
-    echo "<script>alert('Donation recorded successfully'); window.location='dashboard.php';</script>";
+header("Location: dashboard.php");
 }
 ?>
+<link rel="stylesheet" href="../assets/css/style.css">
+<h2>Donate</h2>
 
-<h2>Donate to <?php echo $org['name']; ?></h2>
+<form method="POST">
 
-<form method="POST" enctype="multipart/form-data">
+<select id="cat" name="category" onchange="update()">
+<option value="Food">Food</option>
+<option value="Groceries">Groceries</option>
+</select>
 
-    <label>Donation Type:</label><br>
-    <select name="category" required>
-        <option value="Food">Food</option>
-        <option value="Groceries">Groceries</option>
-        <option value="Clothes">Clothes</option>
-    </select><br><br>
+<input id="qty" name="qty" type="number" oninput="calc()">
+<input id="price" readonly>
+<input id="total" readonly>
 
-    <label>Donation Amount:</label><br>
-    <select name="amount" required>
-        <option value="450">Feed 3 people (₹150 each)</option>
-        <option value="1000">Groceries for 5 people (₹1000)</option>
-        <option value="2000">Healthcare Support</option>
-    </select><br><br>
+<input type="hidden" name="price" id="hidden_price">
 
-    <label>Upload Payment Proof:</label><br>
-    <input type="file" name="proof" required><br><br>
+<button name="donate">Donate</button>
 
-    <button name="donate">Submit Donation</button>
 </form>
 
-<hr>
+<script>
+function update(){
+let c=document.getElementById("cat").value;
 
-<h3>Payment Details</h3>
-<p><b>UPI:</b> example@upi</p>
-<p><b>Account No:</b> 1234567890</p>
-<p><b>IFSC:</b> ABCD0123456</p>
+let price=150,min=3;
+
+if(c=="Groceries"){price=200;min=5;}
+
+document.getElementById("price").value=price;
+document.getElementById("hidden_price").value=price;
+
+let q=document.getElementById("qty");
+q.value=min; q.min=min;
+
+calc();
+}
+
+function calc(){
+let q=document.getElementById("qty").value;
+let p=document.getElementById("price").value;
+
+document.getElementById("total").value=q*p;
+}
+
+update();
+</script>

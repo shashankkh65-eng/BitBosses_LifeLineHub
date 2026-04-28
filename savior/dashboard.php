@@ -2,28 +2,52 @@
 session_start();
 include("../config/db.php");
 
-if(!isset($_SESSION['savior_id'])) {
-    header("Location: ../auth/savior_login.php");
+if(!isset($_SESSION['savior_id'])){
+    header("Location: ../auth/index.php");
     exit();
 }
+?>
 
-echo "<h2>Welcome Savior: ".$_SESSION['savior_name']."</h2>";
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Savior Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
 
-// Show donations
-$result = $conn->query("SELECT * FROM donation");
+<body>
 
-echo "<h3>Pending Deliveries</h3>";
+<div class="navbar">
+    <h2>Life-Line Hub - Savior</h2>
+</div>
 
-while($row = $result->fetch_assoc()) {
-    echo "<div style='border:1px solid #ccc; padding:10px; margin:10px;'>
-            <p>Donor: ".$row['donor_id']."</p>
-            <p>Organisation ID: ".$row['org_id']."</p>
-            <p>Category: ".$row['category']."</p>
-            <p>Amount: ₹".$row['amount']."</p>
+<div style="margin:10px;">
+    <a href="../auth/index.php"><button>Home</button></a>
+    <a href="../logout.php"><button>Logout</button></a>
+</div>
 
-            <a href='deliver.php?id=".$row['donation_id']."'>
-                <button>Mark as Delivered</button>
-            </a>
-          </div>";
+<div class="container">
+
+<h3>Pending Deliveries</h3>
+
+<?php
+$res = $conn->query("SELECT * FROM donation WHERE status='Pending'");
+
+while($r = $res->fetch_assoc()){
+    echo "
+    <div class='card'>
+        <p><b>Donor:</b> {$r['donor_id']}</p>
+        <p><b>Amount:</b> ₹{$r['amount']}</p>
+
+        <a href='deliver.php?id={$r['donation_id']}'>
+            <button>Mark Delivered</button>
+        </a>
+    </div>
+    ";
 }
 ?>
+
+</div>
+
+</body>
+</html>
