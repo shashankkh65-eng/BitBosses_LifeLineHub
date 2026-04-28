@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <h2>Welcome Donor</h2>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div class="search-box">
+    <input type="text" placeholder="Search organisations...">
+</div>
+
+<h3>Organisations Near You</h3>
+
+<div class="card">
+    <h4>Helping Hands NGO</h4>
+    <p>Location: Bangalore</p>
+    <p>Needs: Food, Clothes</p>
+    <button onclick="goToDonate()">Donate</button>
+</div>
+
+<div class="card">
+    <h4>Care Foundation</h4>
+    <p>Location: Mysore</p>
+    <p>Needs: Groceries, Healthcare</p>
+    <button onclick="goToDonate()">Donate</button>
+</div>
+
+<h3 class="emergency">🚨 Emergency Requests</h3>
+
+<div class="card emergency-card">
+    <p>Urgent Blood Requirement</p>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
